@@ -20,10 +20,9 @@ class ContentViewModel : ObservableObject {
                 continuation.resume(returning: item)
             })
         }
-        
-        DispatchQueue.main.async{
+       
+        DispatchQueue.main.async {
             self.data = item
-            print(self.data)
         }
     }
     

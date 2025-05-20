@@ -8,18 +8,30 @@
 import SwiftUI
 
 struct ContentView: View {
-    private var viewModel = ContentViewModel()
+    @ObservedObject var viewModel = ContentViewModel()
     @State private var path: [DeviceData] = [] // Navigation path
+    @State var searchtext = ""
 
     var body: some View {
         NavigationStack(path: $path) {
+            RoundedRectangle(cornerRadius: 20)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
+                .frame(height: 40)
+                .overlay(content: {
+                    TextField("Search Device", text: $searchtext)
+                        .padding(.horizontal, 20)
+                })
+            
             Group {
-                if !viewModel.data.isEmpty{
-                    DevicesList(devices: viewModel.data) { selectedComputer in
-                        viewModel.navigateToDetail(navigateDetail: selectedComputer)
+                if searchtext.isEmpty{
+                    if viewModel.data.isEmpty {
+                        ProgressView("Loading...")
+                    } else {
+                        DevicesList(devices: viewModel.data) { selectedComputer in
+                            viewModel.navigateToDetail(navigateDetail: selectedComputer)
+                        }
                     }
-                } else {
-                    ProgressView("Loading...")
                 }
             }
             .onChange(of: viewModel.navigateDetail, {
@@ -33,14 +45,6 @@ struct ContentView: View {
             .task({
                 await viewModel.fetchAPI()
             })
-            .onAppear {
-                let navigate = viewModel.navigateDetail
-                if (navigate != nil) {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        path.append(navigate!)
-                    }
-                }
-            }
         }
     }
 }
