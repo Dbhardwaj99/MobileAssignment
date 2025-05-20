@@ -12,12 +12,19 @@ class ContentViewModel : ObservableObject {
     
     private let apiService = ApiService()
     @Published var navigateDetail: DeviceData? = nil
-    @Published var data: [DeviceData]? = []
+    @Published var data: [DeviceData] = []
 
-    func fetchAPI() {
-        apiService.fetchDeviceDetails(completion: { item in
+    func fetchAPI() async {
+        let item: [DeviceData] = await withCheckedContinuation { continuation in
+            apiService.fetchDeviceDetails(completion: { item in
+                continuation.resume(returning: item)
+            })
+        }
+        
+        DispatchQueue.main.async{
             self.data = item
-        })
+            print(self.data)
+        }
     }
     
     func navigateToDetail(navigateDetail: DeviceData) {

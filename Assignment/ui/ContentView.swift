@@ -14,8 +14,8 @@ struct ContentView: View {
     var body: some View {
         NavigationStack(path: $path) {
             Group {
-                if let computers = viewModel.data, !computers.isEmpty {
-                    DevicesList(devices: computers) { selectedComputer in
+                if !viewModel.data.isEmpty{
+                    DevicesList(devices: viewModel.data) { selectedComputer in
                         viewModel.navigateToDetail(navigateDetail: selectedComputer)
                     }
                 } else {
@@ -30,6 +30,9 @@ struct ContentView: View {
             .navigationDestination(for: DeviceData.self) { computer in
                 DetailView(device: computer)
             }
+            .task({
+                await viewModel.fetchAPI()
+            })
             .onAppear {
                 let navigate = viewModel.navigateDetail
                 if (navigate != nil) {
